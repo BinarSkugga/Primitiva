@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <properties>
+    <!-- DEPLOYMENT -->
+    <deployment.artifact.id>primitiva</deployment.artifact.id>
+    <deployment.artifact.owner>binarskugga</deployment.artifact.owner>
+    <deployment.artifact.version>1.0</deployment.artifact.version>
+    <deployment.java.version>1.8</deployment.java.version>
+
+    <!-- MAVEN -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <github.global.server>github</github.global.server>
+    <maven.compiler.source>${deployment.java.version}</maven.compiler.source>
+    <maven.compiler.target>${deployment.java.version}</maven.compiler.target>
+
+    <!-- UTILS -->
+    <versions.apache.commons>3.8.1</versions.apache.commons>
+  </properties>
+
+  <groupId>com.binarskugga</groupId>
+  <artifactId>${deployment.artifact.id}</artifactId>
+  <version>${deployment.artifact.version}</version>
+
+  <name>${deployment.artifact.id}</name>
+  <url>https://binarskugga.com</url>
+
+  <developers>
+    <developer>
+      <name>Charles Smith</name>
+      <email>binarskugga@gmail.com</email>
+      <organization>BinarSkugga</organization>
+      <organizationUrl>https://github.com/BinarSkugga</organizationUrl>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>${deployment.artifact.id}.repo</id>
+      <url>file://${project.build.directory}/maven</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <version>0.12</version>
+        <configuration>
+          <branch>refs/heads/maven</branch>
+          <merge>true</merge> <noJekyll>true</noJekyll>
+          <outputDirectory>${project.build.directory}/maven</outputDirectory>
+          <message>Maven artifacts for ${project.version}</message>
+          <includes>
+            <include>**/*</include>
+          </includes>
+          <repositoryName>${deployment.artifact.id}</repositoryName>
+          <repositoryOwner>${deployment.artifact.owner}</repositoryOwner>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/java/resources</directory>
+      </resource>
+    </resources>
+  </build>
+
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${versions.apache.commons}</version>
+    </dependency>
+  </dependencies>
+</project>
