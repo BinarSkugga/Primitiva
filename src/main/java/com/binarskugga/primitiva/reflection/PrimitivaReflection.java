@@ -2,7 +2,6 @@ package com.binarskugga.primitiva.reflection;
 
 import com.binarskugga.primitiva.conversion.PrimitivaArrayConverter;
 import com.binarskugga.primitiva.conversion.PrimitivaConversion;
-import com.binarskugga.primitiva.conversion.PrimitivaConverter;
 import com.binarskugga.primitiva.exception.ReflectiveConstructFailedException;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -15,11 +14,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Charles Smith (BinarSkugga)
+ * PrimitivaReflection is a static class that provides multiple utilities when using the reflection API.
+ * This class has no value when instantiated.
+ */
 public class PrimitivaReflection {
 
-	private PrimitivaReflection() {
-	}
+	private PrimitivaReflection() { }
 
+	/**
+	 * Create a class object from its fully qualified name using Class.forName. If the inner operation
+	 * throws an exception, the method silence it and returns null.
+	 * @param str the fully qualified class name.
+	 * @return a class object or null if failure.
+	 */
 	public static Class forNameOrNull(String str) {
 		try {
 			return Class.forName(str);
@@ -28,6 +37,11 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Gets all fields of a class, including private and superclass fields.
+	 * @param clazz the target class to get fields froms.
+	 * @return all fields from the target class.
+	 */
 	public static List<Field> getAllFields(Class clazz) {
 		List<Field> fields = new ArrayList<>();
 		while (clazz.getSuperclass() != null) {
@@ -37,6 +51,11 @@ public class PrimitivaReflection {
 		return fields;
 	}
 
+	/**
+	 * Gets all methods of a class, including private and superclass methods.
+	 * @param clazz the target class to get methods froms.
+	 * @return all methods from the target class.
+	 */
 	public static List<Method> getAllMethods(Class clazz) {
 		List<Method> methods = new ArrayList<>();
 		while (clazz.getSuperclass() != null) {
@@ -46,27 +65,62 @@ public class PrimitivaReflection {
 		return methods;
 	}
 
+	/**
+	 * Get an annotation on a class or null in case the class is not annotated.
+	 * @param clazz the target class.
+	 * @param annotation the annotation to find.
+	 * @param <T> is the type of the annotation.
+	 * @return the annotation object or null on failure.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends Annotation> T getClassAnnotationOrNull(Class clazz, Class<T> annotation) {
 		if (!clazz.isAnnotationPresent(annotation)) return null;
 		else return (T) clazz.getAnnotation(annotation);
 	}
 
+	/**
+	 * Get an annotation on a method or null in case the method is not annotated.
+	 * @param method the target method.
+	 * @param annotation the annotation to find.
+	 * @param <T> is the type of the annotation.
+	 * @return the annotation object or null on failure.
+	 */
 	public static <T extends Annotation> T getMethodAnnotationOrNull(Method method, Class<T> annotation) {
 		if (!method.isAnnotationPresent(annotation)) return null;
 		else return method.getAnnotation(annotation);
 	}
 
+	/**
+	 * Get an annotation on a field or null in case the field is not annotated.
+	 * @param field the target field.
+	 * @param annotation the annotation to find.
+	 * @param <T> is the type of the annotation.
+	 * @return the annotation object or null on failure.
+	 */
 	public static <T extends Annotation> T getFieldAnnotationOrNull(Field field, Class<T> annotation) {
 		if (!field.isAnnotationPresent(annotation)) return null;
 		else return field.getAnnotation(annotation);
 	}
 
+	/**
+	 * Get an annotation on a parameter or null in case the parameter is not annotated.
+	 * @param param the target parameter.
+	 * @param annotation the annotation to find.
+	 * @param <T> is the type of the annotation.
+	 * @return the annotation object or null on failure.
+	 */
 	public static <T extends Annotation> T getParamAnnotationOrNull(Parameter param, Class<T> annotation) {
 		if (!param.isAnnotationPresent(annotation)) return null;
 		else return param.getAnnotation(annotation);
 	}
 
+	/**
+	 * Get an annotation on a class, method, field or parameter or null in case the object is not annotated.
+	 * @param reflect the target which need to be of type Class, Method, Field or Parameter.
+	 * @param annotation the annotation to find.
+	 * @param <T> is the type of the annotation.
+	 * @return the annotation object or null if the annotation is not present or the reflect object is of an invalid type.
+	 */
 	public static <T extends Annotation> T getAnnotationOrNull(Object reflect, Class<T> annotation) {
 		if (Class.class.isAssignableFrom(reflect.getClass()))
 			return PrimitivaReflection.getClassAnnotationOrNull((Class) reflect, annotation);
@@ -79,6 +133,14 @@ public class PrimitivaReflection {
 		return null;
 	}
 
+	/**
+	 * Try to call the constructor that uses the arguments specified. To call the empty constructor,
+	 * simply omit the arguments parameter.
+	 * @param declaring the class to be instantiated.
+	 * @param arguments the arguments of the constructor.
+	 * @param <T> the type that will be returned on success.
+	 * @return the constructed object or null if the constructor cannot be called properly.
+	 */
 	public static <T> T constructOrNull(Class<T> declaring, Object... arguments) {
 		try {
 			return safeConstruct(declaring, arguments);
@@ -88,6 +150,15 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Try to call the constructor that uses the arguments specified. To call the empty constructor,
+	 * simply omit the arguments parameter.
+	 * @param declaring the class to be instantiated.
+	 * @param arguments the arguments of the constructor.
+	 * @param <T> the type that will be returned on success.
+	 * @throws ReflectiveConstructFailedException when the reflection API fails to call a constructor with the specified arguments.
+	 * @return the constructed object.
+	 */
 	public static <T> T safeConstruct(Class<T> declaring, Object... arguments) throws ReflectiveConstructFailedException {
 		try {
 			Constructor<T> constructor;
@@ -105,6 +176,13 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Set the value of a field.
+	 * @param field the field to set.
+	 * @param instance the object instance that holds the previously provided field.
+	 * @param value the value to set the field with.
+	 * @param force whether or not to force the value, will fail silently if this is false and the field is private / not accessible.
+	 */
 	public static void setField(Field field, Object instance, Object value, boolean force) {
 		try {
 			if (force) field.setAccessible(true);
@@ -113,10 +191,23 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Set the value of a field and assume a forced set.
+	 * @param field the field to set.
+	 * @param instance the object instance that holds the previously provided field.
+	 * @param value the value to set the field with.
+	 */
 	public static void setField(Field field, Object instance, Object value) {
 		setField(field, instance, value, true);
 	}
 
+	/**
+	 * Get de value of a field
+	 * @param field the field to get the value from.
+	 * @param instance the object instance that holds the previously provided field.
+	 * @param force whether or not to force the retrieval, will fail silently if this is false and the field is private / not accessible.
+	 * @return the value of the field for an instance.
+	 */
 	public static Object getField(Field field, Object instance, boolean force) {
 		try {
 			if (force) field.setAccessible(true);
@@ -126,11 +217,24 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Get de value of a field and assumes a forced retrieval.
+	 * @param field the field to get the value from.
+	 * @param instance the object instance that holds the previously provided field.
+	 * @return the value of the field for an instance.
+	 */
 	public static Object getField(Field field, Object instance) {
 		return getField(field, instance, true);
 	}
 
-
+	/**
+	 * Invoke a method and returns its value or null if the invocation fails.
+	 * @param returnClass the type that is supposed to be returned from the method.
+	 * @param action the method to invoke.
+	 * @param instance is the method is not static (specify null if it is static), the instance the method needs to be called on.
+	 * @param arguments the arguments of the method to invoke.
+	 * @return the method result or null it fails to be invoked.
+	 */
 	public static <T> T invokeOrNull(Class<T> returnClass, Method action, Object instance, Object[] arguments) {
 		try {
 			return (T) action.invoke(instance, arguments);
@@ -140,26 +244,57 @@ public class PrimitivaReflection {
 		}
 	}
 
+	/**
+	 * Compare a class to 2 other classes and returns true if one or both of the two classes are equals the initial class.
+	 * @param clazz the initial class to compare.
+	 * @param boxed the first comparator.
+	 * @param unboxed the second comparator.
+	 * @return true if one or both of the two classes are equals the initial class.
+	 */
 	public static boolean typeEqualsIgnoreBoxing(Class clazz, Class boxed, Class unboxed) {
 		return clazz.equals(boxed) || clazz.equals(unboxed);
 	}
 
+	/**
+	 * Compare a 2 classes to 2 other classes and returns true if one or both of the two classes are equals to both of the initial classes.
+	 * @param clazz the fist initial class to compare.
+	 * @param clazz2 the second initial class to compare.
+	 * @param boxed the first comparator.
+	 * @param unboxed the second comparator.
+	 * @return true if one or both of the two classes are equals to both of the initial classes.
+	 */
 	public static boolean typeEqualsIgnoreBoxing(Class clazz, Class clazz2, Class boxed, Class unboxed) {
 		return (clazz.equals(boxed) || clazz.equals(unboxed)) && (clazz2.equals(boxed) || clazz2.equals(unboxed));
 	}
 
+	/**
+	 * Returns the component type of the class specified or itself in case it is not an array type.
+	 * @param arrayClass the class to get the component type from.
+	 * @return the component type of the class specified or itself in case it is not an array type.
+	 */
 	public static Class getInnerArrayType(Class arrayClass) {
 		if (arrayClass.isArray())
 			return arrayClass.getComponentType();
 		return arrayClass;
 	}
 
+	/**
+	 * Returns whether or not the class specified is a primitive type. This method returns false for the void class.
+	 * @param clazz the class to check.
+	 * @return whether or not the class specified is a primitive type.
+	 */
 	public static boolean isPrimitive(Class clazz) {
 		return clazz.equals(byte.class) || clazz.equals(short.class) || clazz.equals(int.class)
 				|| clazz.equals(long.class) || clazz.equals(double.class) || clazz.equals(float.class)
 				|| clazz.equals(char.class) || clazz.equals(boolean.class);
 	}
 
+	/**
+	 * Returns whether or not the class specified is a boxed primitive type. Inheriting the Number class will expand the
+	 * behavior of this method. This method returns false for the Void class.
+	 * @param clazz the class to check.
+	 * @return whether or not the class specified is a boxed primitive type.
+	 */
 	public static boolean isBoxedPrimitive(Class clazz) {
 		return Number.class.isAssignableFrom(clazz) || clazz.equals(Character.class) || clazz.equals(Boolean.class);
 	}

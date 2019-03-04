@@ -1,5 +1,10 @@
 package com.binarskugga.primitiva.exception;
 
+/**
+ * @author Charles Smith (BinarSkugga)
+ * ReflectiveConstructFailedException is thrown when the PrimitivaReflection fails to construct
+ * an object with the provided arguments.
+ */
 public class ReflectiveConstructFailedException extends Exception {
 
 	public ReflectiveConstructFailedException() {
