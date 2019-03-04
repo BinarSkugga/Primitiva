@@ -5,12 +5,13 @@ import com.binarskugga.primitiva.reflection.PrimitivaReflection;
 import lombok.Setter;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class PrimitivaArrayConverter {
+public class PrimitivaArrayConverter<T> {
 
 	private Class inC;
-	private Class inUnboxedC;
+	private Class<T> inUnboxedC;
 	@Setter private String separator = ",";
 
+	@SuppressWarnings("unchecked")
 	PrimitivaArrayConverter(Class in) {
 		this.inC = in;
 		if(PrimitivaReflection.isBoxedPrimitiveArray(in))
@@ -20,7 +21,7 @@ public class PrimitivaArrayConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T, V> V convertTo(Class<V> outC, T in) {
+	public <V> V convertTo(Class<V> outC, T in) {
 		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)
 				|| !CharSequence.class.isAssignableFrom(this.inC) || !this.inC.equals(String[].class))
 			throw new NotPrimitiveException();
@@ -37,12 +38,12 @@ public class PrimitivaArrayConverter {
 			wasBoxed = true;
 		}
 
-		Object result = this.convertPrimitiveArray(outUnboxedC, inUnboxed);
+		Object result = this.convertPrimitiveArray(outUnboxedC, (T) inUnboxed);
 		return (V) (wasBoxed ? boxArray(outUnboxedC, result) : result);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T, V> V convertPrimitiveArray(Class<V> outC, T in) {
+	private <V> V convertPrimitiveArray(Class<V> outC, T in) {
 		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) || !PrimitivaReflection.isPrimitiveArray(outC)
 				|| !CharSequence.class.isAssignableFrom(this.inUnboxedC) || !this.inUnboxedC.equals(String[].class))
 			throw new NotPrimitiveException();

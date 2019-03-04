@@ -5,16 +5,12 @@ public class PrimitivaConversion {
 
 	private PrimitivaConversion() {}
 
-	public static PrimitivaArrayConverter array(Class inC) {
-		return new PrimitivaArrayConverter(inC);
+	public static <T> PrimitivaArrayConverter<T> array(Class<T> inC) {
+		return new PrimitivaArrayConverter<>(inC);
 	}
 
-	public static PrimitivaConverter single(Class inC) {
-		return new PrimitivaConverter(inC);
-	}
-
-	public static PrimitivaConverter fromString() {
-		return new PrimitivaConverter(String.class);
+	public static <T> PrimitivaConverter<T> single(Class<T> inC) {
+		return new PrimitivaConverter<>(inC);
 	}
 
 }

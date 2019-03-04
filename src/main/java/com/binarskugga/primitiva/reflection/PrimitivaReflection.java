@@ -1,5 +1,8 @@
 package com.binarskugga.primitiva.reflection;
 
+import com.binarskugga.primitiva.conversion.PrimitivaArrayConverter;
+import com.binarskugga.primitiva.conversion.PrimitivaConversion;
+import com.binarskugga.primitiva.conversion.PrimitivaConverter;
 import com.binarskugga.primitiva.exception.ReflectiveConstructFailedException;
 import org.apache.commons.lang3.ArrayUtils;
 
