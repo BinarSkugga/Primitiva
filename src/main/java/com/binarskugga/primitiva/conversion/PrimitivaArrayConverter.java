@@ -2,12 +2,14 @@ package com.binarskugga.primitiva.conversion;
 
 import com.binarskugga.primitiva.exception.NotPrimitiveException;
 import com.binarskugga.primitiva.reflection.PrimitivaReflection;
+import lombok.Setter;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class PrimitivaArrayConverter {
 
 	private Class inC;
 	private Class inUnboxedC;
+	@Setter private String separator = ",";
 
 	PrimitivaArrayConverter(Class in) {
 		this.inC = in;
@@ -19,7 +21,9 @@ public class PrimitivaArrayConverter {
 
 	@SuppressWarnings("unchecked")
 	public <T, V> V convertTo(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)
+				|| !CharSequence.class.isAssignableFrom(this.inC) || !this.inC.equals(String[].class))
+			throw new NotPrimitiveException();
 
 		Object inUnboxed = in;
 		if(PrimitivaReflection.isBoxedPrimitiveArray(this.inC)) {
@@ -39,7 +43,9 @@ public class PrimitivaArrayConverter {
 
 	@SuppressWarnings("unchecked")
 	private <T, V> V convertPrimitiveArray(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) || !PrimitivaReflection.isPrimitiveArray(outC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) || !PrimitivaReflection.isPrimitiveArray(outC)
+				|| !CharSequence.class.isAssignableFrom(this.inUnboxedC) || !this.inUnboxedC.equals(String[].class))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(outC)) return (V) in;
 		else if(outC.equals(boolean[].class)) return (V) this.toBoolean(in);
 		else if(outC.equals(char[].class)) return (V) this.toChar(in);
@@ -100,8 +106,11 @@ public class PrimitivaArrayConverter {
 
 	//region Primitive array conversions
 	public <T> boolean[] toBoolean(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(boolean[].class)) return (boolean[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toBoolean((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toBoolean((CharSequence) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toBoolean((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toBoolean((double[]) in);
 		else if(this.inUnboxedC.equals(float[].class)) return toBoolean((float[]) in);
@@ -110,6 +119,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toBoolean((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toBoolean((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public boolean[] toBoolean(CharSequence a) {
+		String[] splitted = ((String) a).split(this.separator);
+		return this.toBoolean(splitted);
+	}
+	public boolean[] toBoolean(String[] a) {
+		boolean[] b = new boolean[a.length];
+		for(int i = 0; i < a.length; i++) b[i] = a[i].equalsIgnoreCase("true");
+		return b;
 	}
 	public boolean[] toBoolean(char[] a) {
 		boolean[] b = new boolean[a.length];
@@ -148,8 +166,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> char[] toChar(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(char[].class)) return (char[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toChar((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toChar((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toChar((boolean[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toChar((double[]) in);
 		else if(this.inUnboxedC.equals(float[].class)) return toChar((float[]) in);
@@ -158,6 +179,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toChar((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toChar((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public char[] toChar(CharSequence a) {
+		String[] splitted = ((String) a).split(this.separator);
+		return this.toChar(splitted);
+	}
+	public char[] toChar(String[] a) {
+		char[] c = new char[a.length];
+		for(int i = 0; i < a.length; i++) c[i] = a[i].charAt(0);
+		return c;
 	}
 	public char[] toChar(boolean[] a) {
 		char[] c = new char[a.length];
@@ -196,8 +226,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> double[] toDouble(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(double[].class)) return (double[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toDouble((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toDouble((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toDouble((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toDouble((char[]) in);
 		else if(this.inUnboxedC.equals(float[].class)) return toDouble((float[]) in);
@@ -206,6 +239,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toDouble((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toDouble((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public double[] toDouble(CharSequence a) {
+		String[] splitted = ((String) a).split(this.separator);
+		return this.toDouble(splitted);
+	}
+	public double[] toDouble(String[] a) {
+		double[] d = new double[a.length];
+		for(int i = 0; i < a.length; i++) d[i] = Double.parseDouble(a[i]);
+		return d;
 	}
 	public double[] toDouble(boolean[] a) {
 		double[] d = new double[a.length];
@@ -244,8 +286,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> float[] toFloat(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(float[].class)) return (float[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toFloat((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toFloat((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toFloat((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toFloat((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toFloat((double[]) in);
@@ -254,6 +299,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toFloat((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toFloat((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public float[] toFloat(CharSequence a) {
+		String[] splitted = ((String) a).split(this.separator);
+		return this.toFloat(splitted);
+	}
+	public float[] toFloat(String[] a) {
+		float[] f = new float[a.length];
+		for(int i = 0; i < a.length; i++) f[i] = Float.parseFloat(a[i]);
+		return f;
 	}
 	public float[] toFloat(boolean[] a) {
 		float[] f = new float[a.length];
@@ -292,8 +346,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> long[] toLong(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(long[].class)) return (long[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toLong((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toLong((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toLong((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toLong((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toLong((double[]) in);
@@ -302,6 +359,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(short[].class)) return toLong((short[]) in);
 		else if(this.inUnboxedC.equals(int[].class)) return toLong((int[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public long[] toLong(CharSequence a) {
+		String[] splitted = ((String) a).split(this.separator);
+		return this.toLong(splitted);
+	}
+	public long[] toLong(String[] a) {
+		long[] l = new long[a.length];
+		for(int i = 0; i < a.length; i++) l[i] = Long.parseLong(a[i]);
+		return l;
 	}
 	public long[] toLong(boolean[] a) {
 		long[] l = new long[a.length];
@@ -340,8 +406,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> int[] toInt(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(int[].class)) return (int[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toInt((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toInt((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toInt((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toInt((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toInt((double[]) in);
@@ -350,6 +419,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(short[].class)) return toInt((short[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toInt((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public int[] toInt(CharSequence a) {
+		CharSequence[] splitted = ((String) a).split(this.separator);
+		return this.toInt(splitted);
+	}
+	public int[] ToInt(String[] a) {
+		int[] s = new int[a.length];
+		for(int i = 0; i < a.length; i++) s[i] = Integer.parseInt(a[i]);
+		return s;
 	}
 	public int[] toInt(boolean[] a) {
 		int[] in = new int[a.length];
@@ -388,8 +466,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> short[] toShort(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(short[].class)) return (short[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toShort((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toShort((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toShort((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toShort((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toShort((double[]) in);
@@ -398,6 +479,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toShort((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toShort((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public short[] toShort(CharSequence a) {
+		CharSequence[] splitted = ((String) a).split(this.separator);
+		return this.toShort(splitted);
+	}
+	public short[] toShort(String[] a) {
+		short[] s = new short[a.length];
+		for(int i = 0; i < a.length; i++) s[i] = Short.parseShort(a[i]);
+		return s;
 	}
 	public short[] toShort(boolean[] a) {
 		short[] s = new short[a.length];
@@ -436,8 +526,11 @@ public class PrimitivaArrayConverter {
 	}
 
 	public <T> byte[] toByte(T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC)
+				&& !this.inUnboxedC.equals(String[].class)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(byte[].class)) return (byte[]) in;
+		else if(this.inUnboxedC.equals(String[].class)) return toByte((String[]) in);
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toByte((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean[].class)) return toByte((boolean[]) in);
 		else if(this.inUnboxedC.equals(char[].class)) return toByte((char[]) in);
 		else if(this.inUnboxedC.equals(double[].class)) return toByte((double[]) in);
@@ -446,6 +539,15 @@ public class PrimitivaArrayConverter {
 		else if(this.inUnboxedC.equals(int[].class)) return toByte((int[]) in);
 		else if(this.inUnboxedC.equals(long[].class)) return toByte((long[]) in);
 		else throw new NotPrimitiveException();
+	}
+	public byte[] toByte(CharSequence a) {
+		CharSequence[] splitted = ((String) a).split(this.separator);
+		return this.toByte(splitted);
+	}
+	public byte[] toByte(String[] a) {
+		byte[] b = new byte[a.length];
+		for(int i = 0; i < a.length; i++) b[i] = Byte.parseByte(a[i]);
+		return b;
 	}
 	public byte[] toByte(boolean[] a) {
 		byte[] b = new byte[a.length];

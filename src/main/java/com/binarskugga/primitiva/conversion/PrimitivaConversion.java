@@ -13,4 +13,8 @@ public class PrimitivaConversion {
 		return new PrimitivaConverter(inC);
 	}
 
+	public static PrimitivaConverter fromString() {
+		return new PrimitivaConverter(String.class);
+	}
+
 }

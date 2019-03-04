@@ -19,6 +19,7 @@
 
     <!-- UTILS -->
     <versions.apache.commons>3.8.1</versions.apache.commons>
+    <versions.projectlombok>1.18.4</versions.projectlombok>
   </properties>
 
   <groupId>com.binarskugga</groupId>
@@ -93,6 +94,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${versions.apache.commons}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${versions.projectlombok}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

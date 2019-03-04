@@ -18,7 +18,8 @@ public class PrimitivaConverter {
 
 	@SuppressWarnings("unchecked")
 	public <V> V convertTo(Class<V> outC, Object in) {
-		if(!PrimitivaReflection.isPrimitiveOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveOrBoxed(outC)) return null;
+		if((!PrimitivaReflection.isPrimitiveOrBoxed(this.inC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+				|| !PrimitivaReflection.isPrimitiveOrBoxed(outC)) throw new NotPrimitiveException();
 
 		Class outUnboxedC = outC;
 		if(PrimitivaReflection.isBoxedPrimitiveArray(outC))
@@ -30,7 +31,8 @@ public class PrimitivaConverter {
 
 	@SuppressWarnings("unchecked")
 	private <V> V convertPrimitive(Class<V> outC, Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) || !PrimitivaReflection.isPrimitive(outC)) throw new NotPrimitiveException();
+		if((!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+				|| !PrimitivaReflection.isPrimitive(outC)) throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(outC)) return (V) in;
 		else if(outC.equals(boolean.class)) return (V) this.toBoolean(in);
 		else if(outC.equals(char.class)) return (V) this.toChar(in);
@@ -45,8 +47,10 @@ public class PrimitivaConverter {
 
 	//region Primitive array conversions
 	public Boolean toBoolean(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(boolean.class)) return (boolean) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toBoolean((CharSequence) in);
 		else if(this.inUnboxedC.equals(char.class)) return toBoolean((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toBoolean((double) in);
 		else if(this.inUnboxedC.equals(float.class)) return toBoolean((float) in);
@@ -56,31 +60,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toBoolean((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public boolean toBoolean(char a) {
+	private boolean toBoolean(CharSequence a) {
+		return ((String) a).equalsIgnoreCase("true");
+	}
+	private boolean toBoolean(char a) {
 		return a > 0;
 	}
-	public boolean toBoolean(double a) {
+	private boolean toBoolean(double a) {
 		return a > 0;
 	}
-	public boolean toBoolean(float a) {
+	private boolean toBoolean(float a) {
 		return a > 0;
 	}
-	public boolean toBoolean(byte a) {
+	private boolean toBoolean(byte a) {
 		return a > 0;
 	}
-	public boolean toBoolean(short a) {
+	private boolean toBoolean(short a) {
 		return a > 0;
 	}
-	public boolean toBoolean(int a) {
+	private boolean toBoolean(int a) {
 		return a > 0;
 	}
-	public boolean toBoolean(long a) {
+	private boolean toBoolean(long a) {
 		return a > 0;
 	}
 
 	public Character toChar(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(char.class)) return (char) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toChar((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toChar((boolean) in);
 		else if(this.inUnboxedC.equals(double.class)) return toChar((double) in);
 		else if(this.inUnboxedC.equals(float.class)) return toChar((float) in);
@@ -90,31 +99,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toChar((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public char toChar(boolean a) {
+	private char toChar(CharSequence a) {
+		return a.charAt(0);
+	}
+	private char toChar(boolean a) {
 		return (char) (a ? 1 : 0);
 	}
-	public char toChar(double a) {
+	private char toChar(double a) {
 		return (char) a;
 	}
-	public char toChar(float a) {
+	private char toChar(float a) {
 		return (char) a;
 	}
-	public char toChar(byte a) {
+	private char toChar(byte a) {
 		return (char) a;
 	}
-	public char toChar(short a) {
+	private char toChar(short a) {
 		return (char) a;
 	}
-	public char toChar(int a) {
+	private char toChar(int a) {
 		return (char) a;
 	}
-	public char toChar(long a) {
+	private char toChar(long a) {
 		return (char) a;
 	}
 
 	public Double toDouble(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(double.class)) return (double) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toDouble((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toDouble((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toDouble((char) in);
 		else if(this.inUnboxedC.equals(float.class)) return toDouble((float) in);
@@ -124,31 +138,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toDouble((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public double toDouble(boolean a) {
+	private double toDouble(CharSequence a) {
+		return Double.parseDouble((String) a);
+	}
+	private double toDouble(boolean a) {
 		return a ? 1 : 0;
 	}
-	public double toDouble(char a) {
+	private double toDouble(char a) {
 		return a;
 	}
-	public double toDouble(float a) {
+	private double toDouble(float a) {
 		return a;
 	}
-	public double toDouble(byte a) {
+	private double toDouble(byte a) {
 		return a;
 	}
-	public double toDouble(short a) {
+	private double toDouble(short a) {
 		return a;
 	}
-	public double toDouble(int a) {
+	private double toDouble(int a) {
 		return a;
 	}
-	public double toDouble(long a) {
+	private double toDouble(long a) {
 		return a;
 	}
 
 	public Float toFloat(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(float.class)) return (float) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toFloat((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toFloat((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toFloat((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toFloat((double) in);
@@ -158,31 +177,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toFloat((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public float toFloat(boolean a) {
+	private float toFloat(CharSequence a) {
+		return Float.parseFloat((String) a);
+	}
+	private float toFloat(boolean a) {
 		return a ? 1 : 0;
 	}
-	public float toFloat(char a) {
+	private float toFloat(char a) {
 		return a;
 	}
-	public float toFloat(double a) {
+	private float toFloat(double a) {
 		return (float) a;
 	}
-	public float toFloat(byte a) {
+	private float toFloat(byte a) {
 		return a;
 	}
-	public float toFloat(short a) {
+	private float toFloat(short a) {
 		return a;
 	}
-	public float toFloat(int a) {
+	private float toFloat(int a) {
 		return a;
 	}
-	public float toFloat(long a) {
+	private float toFloat(long a) {
 		return a;
 	}
 
 	public Long toLong(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(long.class)) return (long) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toLong((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toLong((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toLong((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toLong((double) in);
@@ -192,31 +216,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(int.class)) return toLong((int) in);
 		else throw new NotPrimitiveException();
 	}
-	public long toLong(boolean a) {
+	private long toLong(CharSequence a) {
+		return Long.parseLong((String) a);
+	}
+	private long toLong(boolean a) {
 		return a ? 1 : 0;
 	}
-	public long toLong(char a) {
+	private long toLong(char a) {
 		return a;
 	}
-	public long toLong(double a) {
+	private long toLong(double a) {
 		return (long) a;
 	}
-	public long toLong(float a) {
+	private long toLong(float a) {
 		return (long) a;
 	}
-	public long toLong(byte a) {
+	private long toLong(byte a) {
 		return a;
 	}
-	public long toLong(short a) {
+	private long toLong(short a) {
 		return a;
 	}
-	public long toLong(int a) {
+	private long toLong(int a) {
 		return a;
 	}
 
 	public Integer toInt(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(int.class)) return (int) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toInt((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toInt((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toInt((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toInt((double) in);
@@ -226,31 +255,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toInt((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public int toInt(boolean a) {
+	private int toInt(CharSequence a) {
+		return Integer.parseInt((String) a);
+	}
+	private int toInt(boolean a) {
 		return a ? 1 : 0;
 	}
-	public int toInt(char a) {
+	private int toInt(char a) {
 		return (int) a;
 	}
-	public int toInt(double a) {
+	private int toInt(double a) {
 		return (int) a;
 	}
-	public int toInt(float a) {
+	private int toInt(float a) {
 		return (int) a;
 	}
-	public int toInt(byte a) {
+	private int toInt(byte a) {
 		return a;
 	}
-	public int toInt(short a) {
+	private int toInt(short a) {
 		return a;
 	}
-	public int toInt(long a) {
+	private int toInt(long a) {
 		return (int) a;
 	}
 
 	public Short toShort(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(short.class)) return (short) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toShort((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toShort((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toShort((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toShort((double) in);
@@ -260,31 +294,36 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toShort((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public short toShort(boolean a) {
+	private short toShort(CharSequence a) {
+		return Short.parseShort((String) a);
+	}
+	private short toShort(boolean a) {
 		return (short) (a ? 1 : 0);
 	}
-	public short toShort(char a) {
+	private short toShort(char a) {
 		return (short) a;
 	}
-	public short toShort(double a) {
+	private short toShort(double a) {
 		return (short) a;
 	}
-	public short toShort(float a) {
+	private short toShort(float a) {
 		return (short) a;
 	}
-	public short toShort(byte a) {
+	private short toShort(byte a) {
 		return a;
 	}
-	public short toShort(int a) {
+	private short toShort(int a) {
 		return (short) a;
 	}
-	public short toShort(long a) {
+	private short toShort(long a) {
 		return (short) a;
 	}
 
 	public Byte toByte(Object in) {
-		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC)) throw new NotPrimitiveException();
+		if(!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
+			throw new NotPrimitiveException();
 		else if(this.inUnboxedC.equals(byte.class)) return (byte) in;
+		else if(CharSequence.class.isAssignableFrom(this.inUnboxedC)) return toByte((CharSequence) in);
 		else if(this.inUnboxedC.equals(boolean.class)) return toByte((boolean) in);
 		else if(this.inUnboxedC.equals(char.class)) return toByte((char) in);
 		else if(this.inUnboxedC.equals(double.class)) return toByte((double) in);
@@ -294,25 +333,28 @@ public class PrimitivaConverter {
 		else if(this.inUnboxedC.equals(long.class)) return toByte((long) in);
 		else throw new NotPrimitiveException();
 	}
-	public byte toByte(boolean a) {
+	private byte toByte(CharSequence a) {
+		return Byte.parseByte((String) a);
+	}
+	private byte toByte(boolean a) {
 		return (byte) (a ? 1 : 0);
 	}
-	public byte toByte(char a) {
+	private byte toByte(char a) {
 		return (byte) a;
 	}
-	public byte toByte(double a) {
+	private byte toByte(double a) {
 		return (byte) a;
 	}
-	public byte toByte(float a) {
+	private byte toByte(float a) {
 		return (byte) a;
 	}
-	public byte toByte(short a) {
+	private byte toByte(short a) {
 		return (byte) a;
 	}
-	public byte toByte(int a) {
+	private byte toByte(int a) {
 		return (byte) a;
 	}
-	public byte toByte(long a) {
+	private byte toByte(long a) {
 		return (byte) a;
 	}
 	//endregion
