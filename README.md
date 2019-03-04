@@ -27,9 +27,9 @@ public class Dummy {
     	// Creates a converter that will convert int[] values to any other array of primitives.
         PrimitivaArrayConverter<int[]> intArrayConverter = PrimitivaConversion.array(int[].class);
         
-        // Will convert a int array to a byte array using standard implicit casting.
+        // Will convert a int array to a Byte array using standard implicit casting.
         int[] ia = new int[]{ 45, 63, 156, 3 };
-        byte[] ba = intArrayConverter.convertTo(byte[].class, ia);
+        Byte[] ba = intArrayConverter.convertTo(Byte[].class, ia);
     }
 }
 ```
