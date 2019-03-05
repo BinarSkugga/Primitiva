@@ -38,8 +38,12 @@ public class Dummy {
 ### Maven
 ```xml
 <repository>
-	<id>primitiva.repo</id>
-	<url>https://rawgit.com/binarskugga/primitiva/maven</url>
+    <id>primitiva.repo</id>
+    <url>https://raw.github.com/binarskugga/primitiva/maven</url>
+    <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+    </snapshots>
 </repository>
 ```
 ```xml
