@@ -349,6 +349,28 @@ public class PrimitivaReflection {
 		} else return null;
 	}
 
+	public static Class primitiveArrayOf(Class clazz) {
+		if(isPrimitiveOrBoxed(clazz)) {
+			if(clazz.equals(boolean.class)) return boolean[].class;
+			else if(clazz.equals(char.class)) return char[].class;
+			else if(clazz.equals(double.class)) return double[].class;
+			else if(clazz.equals(float.class)) return float[].class;
+			else if(clazz.equals(long.class)) return long[].class;
+			else if(clazz.equals(int.class)) return int[].class;
+			else if(clazz.equals(short.class)) return short[].class;
+			else if(clazz.equals(byte.class)) return byte[].class;
+			else if(clazz.equals(Boolean.class)) return Boolean[].class;
+			else if(clazz.equals(Character.class)) return Character[].class;
+			else if(clazz.equals(Double.class)) return Double[].class;
+			else if(clazz.equals(Float.class)) return Float[].class;
+			else if(clazz.equals(Long.class)) return Long[].class;
+			else if(clazz.equals(Integer.class)) return Integer[].class;
+			else if(clazz.equals(Short.class)) return Short[].class;
+			else if(clazz.equals(Byte.class)) return Byte[].class;
+			else return null;
+		} else return null;
+	}
+
 	public static Class unbox(Class clazz) {
 		if(!isBoxedPrimitive(clazz) && !isBoxedPrimitiveArray(clazz)) return null;
 		else if(clazz.equals(Boolean.class)) return boolean.class;
