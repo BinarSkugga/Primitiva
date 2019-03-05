@@ -1,9 +1,6 @@
 package com.binarskugga.primitiva.reflection;
 
-import com.binarskugga.primitiva.conversion.PrimitivaArrayConverter;
-import com.binarskugga.primitiva.conversion.PrimitivaConversion;
 import com.binarskugga.primitiva.exception.ReflectiveConstructFailedException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -12,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Charles Smith (BinarSkugga)
@@ -268,17 +264,6 @@ public class PrimitivaReflection {
 	}
 
 	/**
-	 * Returns the component type of the class specified or itself in case it is not an array type.
-	 * @param arrayClass the class to get the component type from.
-	 * @return the component type of the class specified or itself in case it is not an array type.
-	 */
-	public static Class getInnerArrayType(Class arrayClass) {
-		if (arrayClass.isArray())
-			return arrayClass.getComponentType();
-		return arrayClass;
-	}
-
-	/**
 	 * Returns whether or not the class specified is a primitive type. This method returns false for the void class.
 	 * @param clazz the class to check.
 	 * @return whether or not the class specified is a primitive type.
@@ -304,15 +289,11 @@ public class PrimitivaReflection {
 	}
 
 	public static boolean isPrimitiveArray(Class clazz) {
-		return clazz.equals(byte[].class) || clazz.equals(short[].class) || clazz.equals(int[].class)
-				|| clazz.equals(long[].class) || clazz.equals(double[].class) || clazz.equals(float[].class)
-				|| clazz.equals(char[].class) || clazz.equals(boolean[].class);
+		return clazz.isArray() && isPrimitive(clazz.getComponentType());
 	}
 
 	public static boolean isBoxedPrimitiveArray(Class clazz) {
-		return clazz.equals(Byte[].class) || clazz.equals(Short[].class) || clazz.equals(Integer[].class)
-				|| clazz.equals(Long[].class) || clazz.equals(Double[].class) || clazz.equals(Float[].class)
-				|| clazz.equals(Character[].class) || clazz.equals(Boolean[].class);
+		return clazz.isArray() && isBoxedPrimitive(clazz.getComponentType());
 	}
 
 	public static boolean isPrimitiveArrayOrBoxed(Class clazz) {
@@ -337,32 +318,35 @@ public class PrimitivaReflection {
 				|| clazz.equals(long.class);
 	}
 
-	public static Class findPrimitiveCollectionType(Collection collection) {
+	@SuppressWarnings("unchecked")
+	public static Class findCollectionType(Collection collection) {
 		Object zero = collection.stream().findFirst().orElse(null);
-		if(zero == null) return null;
-		return zero.getClass();
+		if(zero == null) return Object.class;
+		else return zero.getClass();
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Object primitiveCollectionToArray(Collection collection) {
-		Class inner = findPrimitiveCollectionType(collection);
-		if(inner.equals(Boolean.class))
-			return collection.toArray(new Boolean[collection.size()]);
-		else if(inner.equals(Character.class))
-			return collection.toArray(new Character[collection.size()]);
-		else if(inner.equals(Double.class))
-			return collection.toArray(new Double[collection.size()]);
-		else if(inner.equals(Float.class))
-			return collection.toArray(new Float[collection.size()]);
-		else if(inner.equals(Long.class))
-			return collection.toArray(new Long[collection.size()]);
-		else if(inner.equals(Integer.class))
-			return collection.toArray(new Integer[collection.size()]);
-		else if(inner.equals(Short.class))
-			return collection.toArray(new Short[collection.size()]);
-		else if(inner.equals(Byte.class))
-			return collection.toArray(new Byte[collection.size()]);
-		else return null;
+		Class inner = findCollectionType(collection);
+		if(inner != null) {
+			if (inner.equals(Boolean.class))
+				return ((Collection<Boolean>) collection).toArray(new Boolean[0]);
+			else if (inner.equals(Character.class))
+				return ((Collection<Character>) collection).toArray(new Character[0]);
+			else if (inner.equals(Double.class))
+				return ((Collection<Double>) collection).toArray(new Double[0]);
+			else if (inner.equals(Float.class))
+				return ((Collection<Float>) collection).toArray(new Float[0]);
+			else if (inner.equals(Long.class))
+				return ((Collection<Long>) collection).toArray(new Long[0]);
+			else if (inner.equals(Integer.class))
+				return ((Collection<Integer>) collection).toArray(new Integer[0]);
+			else if (inner.equals(Short.class))
+				return ((Collection<Short>) collection).toArray(new Short[0]);
+			else if (inner.equals(Byte.class))
+				return ((Collection<Byte>) collection).toArray(new Byte[0]);
+			else return null;
+		} else return null;
 	}
 
 	public static Class unbox(Class clazz) {
@@ -405,88 +389,6 @@ public class PrimitivaReflection {
 		else if(clazz.equals(short[].class)) return Short[].class;
 		else if(clazz.equals(byte[].class)) return Byte[].class;
 		else return null;
-	}
-
-	public static Object stringToPrimitive(String str, Class c) {
-		if (isPrimitiveOrBoxed(c)) {
-			if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Byte.class, byte.class))
-				return Byte.parseByte(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Short.class, short.class))
-				return Short.parseShort(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Integer.class, int.class))
-				return Integer.parseInt(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Long.class, long.class))
-				return Long.parseLong(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Float.class, float.class))
-				return Float.parseFloat(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Double.class, double.class))
-				return Double.parseDouble(str);
-			else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Boolean.class, boolean.class)) {
-				return str.equalsIgnoreCase("true");
-			} else if (PrimitivaReflection.typeEqualsIgnoreBoxing(c, Character.class, char.class)) {
-				return str.charAt(0);
-			} else
-				return str;
-		} else return str;
-	}
-
-	public static Object stringToPrimitiveArray(String str, String separator, Class c) {
-		if (c.equals(byte[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Byte::parseByte).toArray(Byte[]::new));
-		else if (c.equals(short[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Short::parseShort).toArray(Short[]::new));
-		else if (c.equals(int[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Integer::parseInt).toArray(Integer[]::new));
-		else if (c.equals(long[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Long::parseLong).toArray(Long[]::new));
-		else if (c.equals(float[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Float::parseFloat).toArray(Float[]::new));
-		else if (c.equals(double[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(Double::parseDouble).toArray(Double[]::new));
-		else if (c.equals(boolean[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(b -> b.equalsIgnoreCase("true")).toArray(Boolean[]::new));
-		else if (c.equals(char[].class))
-			return ArrayUtils.toPrimitive(Stream.of(str.split(separator)).map(ch -> ch.charAt(0)).toArray(Character[]::new));
-		else if (c.equals(Byte[].class))
-			return Stream.of(str.split(separator)).map(Byte::parseByte).toArray(Byte[]::new);
-		else if (c.equals(Short[].class))
-			return Stream.of(str.split(separator)).map(Short::parseShort).toArray(Short[]::new);
-		else if (c.equals(Integer[].class))
-			return Stream.of(str.split(separator)).map(Integer::parseInt).toArray(Integer[]::new);
-		else if (c.equals(Long[].class))
-			return Stream.of(str.split(separator)).map(Long::parseLong).toArray(Long[]::new);
-		else if (c.equals(Float[].class))
-			return Stream.of(str.split(separator)).map(Float::parseFloat).toArray(Float[]::new);
-		else if (c.equals(Double[].class))
-			return Stream.of(str.split(separator)).map(Double::parseDouble).toArray(Double[]::new);
-		else if (c.equals(Boolean[].class))
-			return Stream.of(str.split(separator)).map(b -> b.equalsIgnoreCase("true")).toArray(Boolean[]::new);
-		else if (c.equals(Character[].class))
-			return Stream.of(str.split(separator)).map(ch -> ch.charAt(0)).toArray(Character[]::new);
-		else
-			return str;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> Collection<T> stringToPrimitiveCollection(String str, String separator, Class<T> inner) {
-		if (inner.equals(Byte.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Byte::parseByte).collect(Collectors.toList());
-		else if (inner.equals(Short.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Short::parseShort).collect(Collectors.toList());
-		else if (inner.equals(Integer.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Integer::parseInt).collect(Collectors.toList());
-		else if (inner.equals(Long.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Long::parseLong).collect(Collectors.toList());
-		else if (inner.equals(Float.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Float::parseFloat).collect(Collectors.toList());
-		else if (inner.equals(Double.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(Double::parseDouble).collect(Collectors.toList());
-		else if (inner.equals(Boolean.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(b -> b.equalsIgnoreCase("true")).collect(Collectors.toList());
-		else if (inner.equals(Character.class))
-			return (Collection<T>) Stream.of(str.split(separator)).map(ch -> ch.charAt(0)).collect(Collectors.toList());
-		else
-			return null;
 	}
 
 }
