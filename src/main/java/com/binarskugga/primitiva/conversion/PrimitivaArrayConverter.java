@@ -22,8 +22,8 @@ public class PrimitivaArrayConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	public <V> V convertTo(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)
-				|| !CharSequence.class.isAssignableFrom(this.inC) || !this.inC.equals(String[].class))
+		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) && !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)
+				&& !CharSequence.class.isAssignableFrom(this.inC) && !this.inC.equals(String[].class))
 			throw new NonConversibleTypeException();
 
 		Object inUnboxed = in;

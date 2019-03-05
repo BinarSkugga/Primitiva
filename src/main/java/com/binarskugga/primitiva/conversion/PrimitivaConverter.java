@@ -19,7 +19,7 @@ public class PrimitivaConverter<T> {
 	@SuppressWarnings("unchecked")
 	public <V> V convertTo(Class<V> outC, T in) {
 		if((!PrimitivaReflection.isPrimitiveOrBoxed(this.inC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
-				|| !PrimitivaReflection.isPrimitiveOrBoxed(outC)) throw new NonConversibleTypeException();
+				&& !PrimitivaReflection.isPrimitiveOrBoxed(outC)) throw new NonConversibleTypeException();
 
 		Class outUnboxedC = outC;
 		if(PrimitivaReflection.isBoxedPrimitiveArray(outC))
