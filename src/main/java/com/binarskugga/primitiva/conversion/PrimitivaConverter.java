@@ -18,8 +18,8 @@ public class PrimitivaConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	public <V> V convertTo(Class<V> outC, T in) {
-		if((!PrimitivaReflection.isPrimitiveOrBoxed(this.inC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
-				&& !PrimitivaReflection.isPrimitiveOrBoxed(outC)) throw new NonConversibleTypeException();
+		if((!PrimitivaReflection.isPrimitiveOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveOrBoxed(outC))
+				&& !CharSequence.class.isAssignableFrom(this.inUnboxedC)) throw new NonConversibleTypeException();
 
 		Class outUnboxedC = outC;
 		if(PrimitivaReflection.isBoxedPrimitiveArray(outC))
@@ -31,8 +31,8 @@ public class PrimitivaConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	private <V> V convertPrimitive(Class<V> outC, T in) {
-		if((!PrimitivaReflection.isPrimitive(this.inUnboxedC) && !CharSequence.class.isAssignableFrom(this.inUnboxedC))
-				|| !PrimitivaReflection.isPrimitive(outC)) throw new NonConversibleTypeException();
+		if((!PrimitivaReflection.isPrimitive(this.inUnboxedC) || !PrimitivaReflection.isPrimitive(outC))
+				&& !CharSequence.class.isAssignableFrom(this.inUnboxedC)) throw new NonConversibleTypeException();
 		else if(this.inUnboxedC.equals(outC)) return (V) in;
 		else if(outC.equals(boolean.class)) return (V) this.toBoolean(in);
 		else if(outC.equals(char.class)) return (V) this.toChar(in);
