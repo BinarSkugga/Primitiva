@@ -44,8 +44,8 @@ public class PrimitivaArrayConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	private <V> V convertPrimitiveArray(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) || !PrimitivaReflection.isPrimitiveArray(outC)
-				|| !CharSequence.class.isAssignableFrom(this.inUnboxedC) || !this.inUnboxedC.equals(String[].class))
+		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !PrimitivaReflection.isPrimitiveArray(outC)
+				&& !CharSequence.class.isAssignableFrom(this.inUnboxedC) && !this.inUnboxedC.equals(String[].class))
 			throw new NonConversibleTypeException();
 		else if(this.inUnboxedC.equals(outC)) return (V) in;
 		else if(outC.equals(boolean[].class)) return (V) this.toBoolean(in);
