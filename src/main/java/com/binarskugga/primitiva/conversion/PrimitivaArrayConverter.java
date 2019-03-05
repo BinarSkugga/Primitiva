@@ -22,7 +22,7 @@ public class PrimitivaArrayConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	public <V> V convertTo(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) && !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC)
+		if((!PrimitivaReflection.isPrimitiveArrayOrBoxed(this.inC) || !PrimitivaReflection.isPrimitiveArrayOrBoxed(outC))
 				&& !CharSequence.class.isAssignableFrom(this.inC) && !this.inC.equals(String[].class))
 			throw new NonConversibleTypeException();
 
@@ -44,7 +44,7 @@ public class PrimitivaArrayConverter<T> {
 
 	@SuppressWarnings("unchecked")
 	private <V> V convertPrimitiveArray(Class<V> outC, T in) {
-		if(!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) && !PrimitivaReflection.isPrimitiveArray(outC)
+		if((!PrimitivaReflection.isPrimitiveArray(this.inUnboxedC) || !PrimitivaReflection.isPrimitiveArray(outC))
 				&& !CharSequence.class.isAssignableFrom(this.inUnboxedC) && !this.inUnboxedC.equals(String[].class))
 			throw new NonConversibleTypeException();
 		else if(this.inUnboxedC.equals(outC)) return (V) in;
