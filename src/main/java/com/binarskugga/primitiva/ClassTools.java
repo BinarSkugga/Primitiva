@@ -3,7 +3,8 @@ package com.binarskugga.primitiva;
 import com.binarskugga.primitiva.exception.CannotBoxException;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
+import java.util.*;
+import java.util.function.*;
 
 public class ClassTools<T> {
 
@@ -102,6 +103,42 @@ public class ClassTools<T> {
 		else throw new CannotBoxException();
 	}
 
+	public List<Field> getAllFields() {
+		return this.getFields(null);
+	}
+
+	public List<Field> getFields(Predicate<Field> predicate) {
+		List<Field> fields = new ArrayList<>();
+		Class c = this.clazz;
+		while (c.getSuperclass() != null) {
+			if(predicate == null) fields.addAll(Arrays.asList(c.getDeclaredFields()));
+			else {
+				for(Field f : c.getDeclaredFields())
+					if(predicate.test(f)) fields.add(f);
+			}
+			c = c.getSuperclass();
+		}
+		return fields;
+	}
+
+	public List<Method> getAllMethods() {
+		return this.getMethods(null);
+	}
+
+	public List<Method> getMethods(Predicate<Method> predicate) {
+		List<Method> methods = new ArrayList<>();
+		Class c = this.clazz;
+		while (c.getSuperclass() != null) {
+			if(predicate == null) methods.addAll(Arrays.asList(c.getDeclaredMethods()));
+			else {
+				for(Method m : c.getDeclaredMethods())
+					if(predicate.test(m)) methods.add(m);
+			}
+			c = c.getSuperclass();
+		}
+		return methods;
+	}
+
 	public boolean isParameterizedType() {
 		return this.original instanceof ParameterizedType;
 	}
@@ -110,6 +147,21 @@ public class ClassTools<T> {
 		if(this.isParameterizedType())
 			return ((ParameterizedType) original).getActualTypeArguments();
 		return null;
+	}
+
+	public Type getFirstTypeArgument() {
+		if(this.isParameterizedType())
+			return ((ParameterizedType) original).getActualTypeArguments()[0];
+		return null;
+	}
+
+	public boolean hasEmptyConstructor() {
+		try {
+			Constructor c = this.clazz.getDeclaredConstructor();
+			return c != null;
+		} catch(Exception e) {
+			return false;
+		}
 	}
 
 	public boolean isSuperOf(Object o) {
