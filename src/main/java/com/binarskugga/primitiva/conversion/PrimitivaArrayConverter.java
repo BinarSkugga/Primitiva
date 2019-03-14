@@ -1,7 +1,6 @@
 package com.binarskugga.primitiva.conversion;
 
 import com.binarskugga.primitiva.exception.NonConversibleTypeException;
-import com.binarskugga.primitiva.reflection.PrimitivaReflection;
 import lombok.Setter;
 import org.apache.commons.lang3.ArrayUtils;
 

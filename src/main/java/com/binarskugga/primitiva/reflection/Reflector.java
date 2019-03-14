@@ -6,6 +6,7 @@ import com.binarskugga.primitiva.exception.NotAnnotatedException;
 import lombok.Getter;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Map;
 
@@ -19,9 +20,50 @@ public abstract class Reflector<T> {
 		this.tools = tools;
 	}
 
+	public abstract int getModifiers();
+
+	public final boolean isStatic() {
+		return Modifier.isStatic(this.getModifiers());
+	}
+	public final boolean isFinal() {
+		return Modifier.isFinal(this.getModifiers());
+	}
+	public final boolean isNative() {
+		return Modifier.isNative(this.getModifiers());
+	}
+	public final boolean isStrict() {
+		return Modifier.isStrict(this.getModifiers());
+	}
+	public final boolean isVolatile() {
+		return Modifier.isVolatile(this.getModifiers());
+	}
+	public final boolean isSynchronized() {
+		return Modifier.isSynchronized(this.getModifiers());
+	}
+	public final boolean isTransient() {
+		return Modifier.isTransient(this.getModifiers());
+	}
+
+	public final boolean isAbstract() {
+		return Modifier.isAbstract(this.getModifiers());
+	}
+	public final boolean isInterface() {
+		return Modifier.isInterface(this.getModifiers());
+	}
+
+	public final boolean isPrivate() {
+		return Modifier.isPrivate(this.getModifiers());
+	}
+	public final boolean isProtected() {
+		return Modifier.isProtected(this.getModifiers());
+	}
+	public final boolean isPublic() {
+		return Modifier.isPublic(this.getModifiers());
+	}
+
 	public abstract <A extends Annotation> A getSafeAnnotation(Class<A> aClass) throws NotAnnotatedException;
 
-	public <A extends Annotation> A getAnnotation(Class<A> aClass) {
+	public final <A extends Annotation> A getAnnotation(Class<A> aClass) {
 		try {
 			return this.getSafeAnnotation(aClass);
 		} catch (Exception e) {
@@ -29,159 +71,159 @@ public abstract class Reflector<T> {
 		}
 	}
 
-	public boolean isPrimitive() {
+	public final boolean isPrimitive() {
 		return this.tools.isPrimitive();
 	}
 
-	public boolean isPrimitiveArray() {
+	public final boolean isPrimitiveArray() {
 		return this.tools.isPrimitiveArray();
 	}
 
-	public boolean isNonNumericPrimitive() {
+	public final boolean isNonNumericPrimitive() {
 		return this.tools.isOneOf(boolean.class, char.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNonNumericPrimitiveArray() {
+	public final boolean isNonNumericPrimitiveArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNonNumericPrimitive();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNonNumericPrimitive();
 	}
 
-	public boolean isNumericPrimitive() {
+	public final boolean isNumericPrimitive() {
 		return this.tools.isOneOf(double.class, float.class, long.class, int.class, short.class, byte.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNumericPrimitiveArray() {
+	public final boolean isNumericPrimitiveArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNumericPrimitive();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNumericPrimitive();
 	}
 
-	public boolean isIntegerPrimitive() {
+	public final boolean isIntegerPrimitive() {
 		return this.tools.isOneOf(long.class, int.class, short.class, byte.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isIntegerPrimitiveArray() {
+	public final boolean isIntegerPrimitiveArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isIntegerPrimitive();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isIntegerPrimitive();
 	}
 
-	public boolean isFloatingPrimitive() {
+	public final boolean isFloatingPrimitive() {
 		return this.tools.isOneOf(double.class, float.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isFloatingPrimitiveArray() {
+	public final boolean isFloatingPrimitiveArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isFloatingPrimitive();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isFloatingPrimitive();
 	}
 
-	public boolean isNonNumericPrimitiveOrBoxed() {
+	public final boolean isNonNumericPrimitiveOrBoxed() {
 		return this.isNonNumericPrimitive() || this.tools.isOneOf(Boolean.class, Character.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNonNumericPrimitiveOrBoxedArray() {
+	public final boolean isNonNumericPrimitiveOrBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNonNumericPrimitiveOrBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNonNumericPrimitiveOrBoxed();
 	}
 
-	public boolean isPrimitiveOrBoxed() {
+	public final boolean isPrimitiveOrBoxed() {
 		return this.tools.isPrimitiveOrBoxed();
 	}
 
-	public boolean isPrimitiveOrBoxedArray() {
+	public final boolean isPrimitiveOrBoxedArray() {
 		return this.tools.isPrimitiveOrBoxedArray();
 	}
 
-	public boolean isNumericPrimitiveOrBoxed() {
+	public final boolean isNumericPrimitiveOrBoxed() {
 		return this.isNumericPrimitive() || this.tools.isSubOf(Number.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNumericPrimitiveOrBoxedArray() {
+	public final boolean isNumericPrimitiveOrBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNumericPrimitiveOrBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNumericPrimitiveOrBoxed();
 	}
 
-	public boolean isIntegerPrimitiveOrBoxed() {
+	public final boolean isIntegerPrimitiveOrBoxed() {
 		return this.isIntegerPrimitive() || this.tools.isOneOf(Long.class, Integer.class, Short.class, Byte.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isIntegerPrimitiveOrBoxedArray() {
+	public final boolean isIntegerPrimitiveOrBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isIntegerPrimitiveOrBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isIntegerPrimitiveOrBoxed();
 	}
 
-	public boolean isFloatingPrimitiveOrBoxed() {
+	public final boolean isFloatingPrimitiveOrBoxed() {
 		return this.isFloatingPrimitive() || this.tools.isOneOf(Double.class, Float.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isFloatingPrimitiveOrBoxedArray() {
+	public final boolean isFloatingPrimitiveOrBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isFloatingPrimitiveOrBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isFloatingPrimitiveOrBoxed();
 	}
 
-	public boolean isPrimitiveBoxed() {
+	public final boolean isPrimitiveBoxed() {
 		return this.isPrimitiveOrBoxed() && !this.isPrimitive();
 	}
 
-	public boolean isPrimitiveBoxedArray() {
+	public final boolean isPrimitiveBoxedArray() {
 		return this.isPrimitiveOrBoxedArray() && !this.isPrimitiveArray();
 	}
 
-	public boolean isNonNumericPrimitiveBoxed() {
+	public final boolean isNonNumericPrimitiveBoxed() {
 		return this.isNonNumericPrimitiveOrBoxed() && !this.isNonNumericPrimitive();
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNonNumericPrimitiveBoxedArray() {
+	public final boolean isNonNumericPrimitiveBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNonNumericPrimitiveBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNonNumericPrimitiveBoxed();
 	}
 
-	public boolean isNumericPrimitiveBoxed() {
+	public final boolean isNumericPrimitiveBoxed() {
 		return this.isNumericPrimitiveOrBoxed() && !this.isNumericPrimitive();
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isNumericPrimitiveBoxedArray() {
+	public final boolean isNumericPrimitiveBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isNumericPrimitiveBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isNumericPrimitiveBoxed();
 	}
 
-	public boolean isIntegerPrimitiveBoxed() {
+	public final boolean isIntegerPrimitiveBoxed() {
 		return this.isIntegerPrimitiveOrBoxed() && !this.isIntegerPrimitive();
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isIntegerPrimitiveBoxedArray() {
+	public final boolean isIntegerPrimitiveBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isIntegerPrimitiveBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isIntegerPrimitiveBoxed();
 	}
 
-	public boolean isFloatingPrimitiveBoxed() {
+	public final boolean isFloatingPrimitiveBoxed() {
 		return this.isFloatingPrimitiveOrBoxed() && !this.isFloatingPrimitive();
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isFloatingPrimitiveBoxedArray() {
+	public final boolean isFloatingPrimitiveBoxedArray() {
 		if(!this.isArray()) return false;
-		return Primitiva.Reflection.ofClass(this.tools.getArrayType()).isFloatingPrimitiveBoxed();
+		return Primitiva.Reflection.ofType(this.tools.getArrayType()).isFloatingPrimitiveBoxed();
 	}
 
-	public boolean isArray() {
+	public final boolean isArray() {
 		return this.tools.isArray();
 	}
 
-	public boolean isCollection() {
+	public final boolean isCollection() {
 		return this.tools.isSubOf(Collection.class);
 	}
 
-	public boolean isMap() {
+	public final boolean isMap() {
 		return this.tools.isSubOf(Map.class);
 	}
 

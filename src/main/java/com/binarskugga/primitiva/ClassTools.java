@@ -1,6 +1,8 @@
 package com.binarskugga.primitiva;
 
 import com.binarskugga.primitiva.exception.CannotBoxException;
+import com.binarskugga.primitiva.reflection.*;
+import org.apache.commons.lang3.reflect.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -209,6 +211,55 @@ public class ClassTools<T> {
 		return this.clazz.isArray();
 	}
 
+	public boolean isCollection() {
+		return this.isSubOf(Collection.class);
+	}
+
+	public int getCollectionDepth() {
+		if(!this.isParameterizedType() || !this.isCollection()) return 0;
+
+		ParameterizedType pType = (ParameterizedType) this.original;
+		ClassTools tools = this;
+		int depth = 0;
+		while(tools.isParameterizedType() && tools.isCollection()) {
+			depth += 1;
+
+			tools = ClassTools.of(pType.getActualTypeArguments()[0]);
+			if(tools.isParameterizedType()) pType = (ParameterizedType) pType.getActualTypeArguments()[0];
+		}
+
+		return depth;
+	}
+
+	public Class getCollectionType() {
+		if(!this.isParameterizedType() || !this.isCollection()) return this.clazz;
+
+		ParameterizedType pType = (ParameterizedType) this.original;
+		ClassTools tools = this;
+		while(tools.isParameterizedType() && tools.isCollection()) {
+			tools = ClassTools.of(pType.getActualTypeArguments()[0]);
+			if(tools.isParameterizedType()) pType = (ParameterizedType) pType.getActualTypeArguments()[0];
+		}
+
+		return tools.get();
+	}
+
+	public ClassTools getArrayTypeFromCollection() {
+		if(!this.isParameterizedType() || !this.isCollection()) return this;
+		return ClassTools.of(this.getArrayTypeName(this.getCollectionType(), this.getCollectionDepth()));
+	}
+
+	public ClassTools getCollectionTypeFromArray() {
+		if(!this.isArray()) return this;
+
+		ParameterizedType pType = new ParameterizedTypeImpl(Collection.class, this.getArrayType());
+		for(int i = 0; i < this.getArrayDepth() - 1; i++) {
+			pType = new ParameterizedTypeImpl(Collection.class,pType);
+		}
+
+		return ClassTools.of(pType);
+	}
+
 	public int getArrayDepth() {
 		if(!this.isArray()) return 0;
 
@@ -250,7 +301,7 @@ public class ClassTools<T> {
 		return ClassTools.of(this.getArrayType()).isPrimitiveOrBoxed();
 	}
 
-	private String getPrimitiveArrayClassName(Class c) {
+	private String getArrayInnerTypeName(Class c) {
 		if(ClassTools.of(c).isPrimitive()) {
 			if(c.equals(boolean.class)) return "Z";
 			else if(c.equals(char.class)) return "C";
@@ -262,7 +313,7 @@ public class ClassTools<T> {
 			else if(c.equals(byte.class)) return "B";
 			else return null;
 		}
-		return null;
+		return c.getName();
 	}
 
 	private Class getArrayTypeName(Class inner, int depth) {
@@ -271,7 +322,7 @@ public class ClassTools<T> {
 			if (tools.isPrimitive()) {
 				char[] charArray = new char[depth];
 				Arrays.fill(charArray, '[');
-				return Class.forName(new String(charArray) + this.getPrimitiveArrayClassName(inner));
+				return Class.forName(new String(charArray) + this.getArrayInnerTypeName(inner));
 			} else {
 				char[] charArray = new char[depth];
 				Arrays.fill(charArray, '[');

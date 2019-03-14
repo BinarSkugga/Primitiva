@@ -4,12 +4,17 @@ import com.binarskugga.primitiva.ClassTools;
 import com.binarskugga.primitiva.exception.*;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 
 public class FieldReflector extends Reflector<Field> {
 
 	public FieldReflector(Field f) {
 		super(f, ClassTools.of(f.getGenericType()));
+	}
+
+	@Override
+	public int getModifiers() {
+		return this.getReflected().getModifiers();
 	}
 
 	@Override

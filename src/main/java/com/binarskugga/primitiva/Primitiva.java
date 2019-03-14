@@ -1,9 +1,8 @@
 package com.binarskugga.primitiva;
 
-import com.binarskugga.primitiva.reflection.FieldReflector;
-import com.binarskugga.primitiva.reflection.TypeReflector;
+import com.binarskugga.primitiva.reflection.*;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 
 public class Primitiva {
 
@@ -15,8 +14,16 @@ public class Primitiva {
 
 	public static class Reflection {
 
-		public static <T> TypeReflector<T> ofClass(Class<T> clazz) {
-			return new TypeReflector<>(clazz);
+		public static TypeReflector ofType(Object type) {
+			return new TypeReflector<>(type);
+		}
+
+		public static MethodReflector ofMethod(Method method) {
+			return new MethodReflector(method);
+		}
+
+		public static ParameterReflector ofParameter(Parameter parameter) {
+			return new ParameterReflector(parameter);
 		}
 
 		public static FieldReflector ofField(Field field) {

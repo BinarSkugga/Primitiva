@@ -16,6 +16,11 @@ public class TypeReflector<T> extends Reflector<Class<T>> {
 		super(ClassTools.of(o).get(), ClassTools.of(o));
 	}
 
+	@Override
+	public int getModifiers() {
+		return this.getReflected().getModifiers();
+	}
+
 	@Override public <A extends Annotation> A getSafeAnnotation(Class<A> aClass) throws NotAnnotatedException {
 		if(this.getReflected().isAnnotationPresent(aClass))
 			return this.getReflected().getAnnotation(aClass);
