@@ -2,7 +2,6 @@ package com.binarskugga.primitiva;
 
 import com.binarskugga.primitiva.exception.CannotBoxException;
 import com.binarskugga.primitiva.reflection.*;
-import org.apache.commons.lang3.reflect.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -151,9 +150,13 @@ public class ClassTools<T> {
 		return null;
 	}
 
-	public Type getFirstTypeArgument() {
+	public Type getTypeArgument() {
+		return getTypeArgument(0);
+	}
+
+	public Type getTypeArgument(int i) {
 		if(this.isParameterizedType())
-			return ((ParameterizedType) original).getActualTypeArguments()[0];
+			return ((ParameterizedType) original).getActualTypeArguments()[i];
 		return null;
 	}
 
