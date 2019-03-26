@@ -1,5 +1,6 @@
 package com.binarskugga.primitiva;
 
+import com.binarskugga.primitiva.conversion.PrimitiveConverter;
 import com.binarskugga.primitiva.reflection.*;
 
 import java.lang.reflect.*;
@@ -8,7 +9,12 @@ public class Primitiva {
 
 	private Primitiva() {}
 
+
 	public static class Conversion {
+
+		public static <T> PrimitiveConverter<T> ofPrimitive(Class<T> clazz) {
+			return new PrimitiveConverter<>(clazz);
+		}
 
 	}
 
