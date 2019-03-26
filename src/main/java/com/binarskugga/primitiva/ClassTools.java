@@ -1,11 +1,14 @@
 package com.binarskugga.primitiva;
 
 import com.binarskugga.primitiva.exception.CannotBoxException;
-import com.binarskugga.primitiva.reflection.*;
+import com.binarskugga.primitiva.reflection.ParameterizedTypeImpl;
 
 import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class ClassTools<T> {
 
@@ -41,6 +44,11 @@ public class ClassTools<T> {
 	}
 
 	public static ClassTools of(Object o) {
+		return new ClassTools(o);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> ClassTools<T> of(Class<T> o) {
 		return new ClassTools(o);
 	}
 
