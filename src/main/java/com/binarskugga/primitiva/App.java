@@ -1,8 +1,6 @@
 package com.binarskugga.primitiva;
 
-import com.binarskugga.primitiva.conversion.PrimitiveConverter;
-
-import java.util.*;
+import java.util.ArrayList;
 
 public class App {
 
@@ -10,7 +8,7 @@ public class App {
 		System.out.println(ClassTools.of(new ArrayList<ArrayList<String>>(){}.getClass().getGenericSuperclass()).getArrayTypeFromCollection().get());
 		System.out.println(ClassTools.of(Boolean[][].class).getCollectionTypeFromArray().getCollectionType());
 
-		Double[][][] test = new PrimitiveConverter<>(Integer[][][].class).convertTo(new Integer[][][]{
+		Double[][][] test = Primitiva.Conversion.ofPrimitive(Integer[][][].class).convertTo(new Integer[][][]{
 				new Integer[][]{
 						new Integer[]{ 56, 0 },
 						new Integer[]{ 43, -50 }
