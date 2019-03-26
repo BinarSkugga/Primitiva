@@ -3,7 +3,10 @@ package com.binarskugga.primitiva;
 import com.binarskugga.primitiva.conversion.PrimitiveConverter;
 import com.binarskugga.primitiva.reflection.*;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class Primitiva {
 
@@ -21,6 +24,10 @@ public class Primitiva {
 	public static class Reflection {
 
 		public static TypeReflector ofType(Object type) {
+			return new TypeReflector<>(type);
+		}
+
+		public static <T> TypeReflector<T> ofType(Class<T> type) {
 			return new TypeReflector<>(type);
 		}
 
