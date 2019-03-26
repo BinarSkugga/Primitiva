@@ -12,6 +12,14 @@ public class FieldReflector extends Reflector<Field> {
 		super(f, ClassTools.of(f.getGenericType()));
 	}
 
+	public void setAccessible(boolean accessible) {
+		this.getReflected().setAccessible(accessible);
+	}
+
+	public boolean isAccessible(boolean accessible) {
+		return this.getReflected().isAccessible();
+	}
+
 	@Override
 	public int getModifiers() {
 		return this.getReflected().getModifiers();

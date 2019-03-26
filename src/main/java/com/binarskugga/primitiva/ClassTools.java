@@ -286,6 +286,22 @@ public class ClassTools<T> {
 		return inner;
 	}
 
+	public int getArrayLength(T array) {
+		if(!this.isArray()) return 0;
+		return ((Object[]) array).length;
+	}
+
+	public int getArrayLength(T array, int depth, int index) {
+		if(!this.isArray()) return 0;
+		if(depth > this.getArrayDepth()) return 0;
+
+		Object[] converted = ((Object[]) array);
+		for(int i = 1; i < depth; i++)
+			converted = (Object[]) converted[index];
+
+		return converted.length;
+	}
+
 	@SuppressWarnings("unchecked")
 	public boolean isPrimitiveArray() {
 		if(!this.isArray()) return false;
@@ -319,7 +335,7 @@ public class ClassTools<T> {
 		return c.getName();
 	}
 
-	private Class getArrayTypeName(Class inner, int depth) {
+	public Class getArrayTypeName(Class inner, int depth) {
 		try {
 			ClassTools tools = ClassTools.of(inner);
 			if (tools.isPrimitive()) {

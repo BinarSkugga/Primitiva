@@ -22,6 +22,10 @@ public class Primitiva {
 			return new MethodReflector(method);
 		}
 
+		public static ConstructorReflector ofConstructor(Constructor constructor) {
+			return new ConstructorReflector(constructor);
+		}
+
 		public static ParameterReflector ofParameter(Parameter parameter) {
 			return new ParameterReflector(parameter);
 		}
@@ -29,10 +33,6 @@ public class Primitiva {
 		public static FieldReflector ofField(Field field) {
 			return new FieldReflector(field);
 		}
-
-	}
-
-	public static class Type {
 
 	}
 

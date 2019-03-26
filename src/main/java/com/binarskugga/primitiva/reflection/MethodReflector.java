@@ -12,6 +12,14 @@ public class MethodReflector extends Reflector<Method> {
 		super(r, ClassTools.of(r.getGenericReturnType()));
 	}
 
+	public void setAccessible(boolean accessible) {
+		this.getReflected().setAccessible(accessible);
+	}
+
+	public boolean isAccessible(boolean accessible) {
+		return this.getReflected().isAccessible();
+	}
+
 	@Override
 	public int getModifiers() {
 		return this.getReflected().getModifiers();
