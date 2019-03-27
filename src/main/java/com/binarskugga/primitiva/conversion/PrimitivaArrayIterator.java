@@ -9,7 +9,6 @@ public class PrimitivaArrayIterator<E> implements Iterator<E> {
 	@Getter private int currentIndex;
 	private Object value;
 
-	@SuppressWarnings("unchecked")
 	public PrimitivaArrayIterator(Object value) {
 		this.value = value;
 		this.currentIndex = 0;

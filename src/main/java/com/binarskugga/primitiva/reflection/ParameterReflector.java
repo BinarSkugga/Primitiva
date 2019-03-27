@@ -1,24 +1,27 @@
 package com.binarskugga.primitiva.reflection;
 
-import com.binarskugga.primitiva.*;
-import com.binarskugga.primitiva.exception.*;
+import com.binarskugga.primitiva.exception.NotAnnotatedException;
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Parameter;
 
 public class ParameterReflector extends Reflector<Parameter> {
 
 	public ParameterReflector(Parameter r) {
-		super(r, ClassTools.of(r.getParameterizedType()));
+		super(r, r.getParameterizedType());
+	}
+
+	@Override public String getName() {
+		return this.getReflected().getName();
 	}
 
 	@Override
-	public int getModifiers() {
+	public int getReflectedModifiers() {
 		return this.getReflected().getModifiers();
 	}
 
 	@Override
-	public <A extends Annotation> A getSafeAnnotation(Class<A> aClass) throws NotAnnotatedException {
+	public <A extends Annotation> A getSafeReflectedAnnotation(Class<A> aClass) throws NotAnnotatedException {
 		if(this.getReflected().isAnnotationPresent(aClass))
 			return this.getReflected().getAnnotation(aClass);
 		else

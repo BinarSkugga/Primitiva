@@ -1,41 +1,41 @@
 package com.binarskugga.primitiva.conversion;
 
 import com.binarskugga.primitiva.ClassTools;
+import com.binarskugga.primitiva.Primitiva;
 import com.binarskugga.primitiva.exception.NonConversibleTypeException;
-import com.binarskugga.primitiva.exception.NonPrimitiveTypeException;
-
-import java.lang.reflect.Array;
-import java.util.Iterator;
 
 public class PrimitiveConverter<T> extends Converter<T> {
 
-	public PrimitiveConverter(Class<T> inClass) throws NonPrimitiveTypeException {
+	public PrimitiveConverter(Class<T> inClass) throws NonConversibleTypeException {
 		super(inClass);
-		if(!this.getInClass().isPrimitiveOrBoxed() && !this.getInClass().isPrimitiveOrBoxedArray()
-			&& !this.getInClass().isSubOf(CharSequence.class)
-			&& !(this.getInClass().isArray() && CharSequence.class.isAssignableFrom(this.getInClass().getArrayType())))
-			throw new NonPrimitiveTypeException();
+		if(!this.isPrimitiveOrBoxed() && !this.isPrimitiveOrBoxedArray()
+			&& !this.isSubOf(CharSequence.class)
+			&& !(this.isArray() && this.getArrayType().isSubOf(CharSequence.class)))
+			throw new NonConversibleTypeException();
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override public <R> R convertTo(T value, Class<R> returnClass) {
-		ClassTools tools = ClassTools.of(returnClass);
-		if(!tools.isPrimitiveOrBoxed() && !tools.isPrimitiveOrBoxedArray())
-			throw new NonPrimitiveTypeException();
+	@Override
+	public <R> R convertTo(T value, Class<R> returnClass) {
+		ClassTools returnTools = ClassTools.of(returnClass);
+		if(!returnTools.isPrimitiveOrBoxed() && !returnTools.isPrimitiveOrBoxedArray()
+				&& !this.isSubOf(CharSequence.class)
+				&& !(this.isArray() && this.getArrayType().isSubOf(CharSequence.class)))
+			throw new NonConversibleTypeException();
 
-		ClassTools outUnboxed = tools.unbox();
-		ClassTools inUnboxed = this.getInClass().unbox();
+		ClassTools outUnboxed = returnTools.unbox();
+		ClassTools inUnboxed = this.unbox();
 
-		if(tools.isArray()) {
+		if(returnTools.isArray()) {
 			if (inUnboxed.get().equals(returnClass)) return (R) value;
-			else if (outUnboxed.getArrayType().equals(boolean.class)) return (R) this.toBooleanArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(char.class)) return (R) this.toCharArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(double.class)) return (R) this.toDoubleArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(float.class)) return (R) this.toFloatArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(long.class)) return (R) this.toLongArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(int.class)) return (R) this.toIntArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(short.class)) return (R) this.toShortArray(returnClass, value);
-			else if (outUnboxed.getArrayType().equals(byte.class)) return (R) this.toByteArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(boolean.class)) return this.toBooleanArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(char.class)) return this.toCharArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(double.class)) return this.toDoubleArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(float.class)) return this.toFloatArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(long.class)) return this.toLongArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(int.class)) return this.toIntArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(short.class)) return this.toShortArray(returnClass, value);
+			else if (outUnboxed.getArrayType().get().equals(byte.class)) return this.toByteArray(returnClass, value);
 			else throw new NonConversibleTypeException();
 		} else {
 			if (inUnboxed.get().equals(returnClass)) return (R) value;
@@ -54,7 +54,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toBooleanArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -63,29 +63,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toBoolean(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toBoolean(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toBooleanArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toBooleanArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Boolean toBoolean(T val) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(boolean.class)) return (Boolean) val;
@@ -127,7 +127,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toCharArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -136,29 +136,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toChar(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toChar(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toCharArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toCharArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Character toChar(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(char.class)) return (Character) in;
@@ -200,7 +200,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toDoubleArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -209,29 +209,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toDouble(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toDouble(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toDoubleArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toDoubleArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Double toDouble(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(double.class)) return (Double) in;
@@ -273,7 +273,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toFloatArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -282,29 +282,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toFloat(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toFloat(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toFloatArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toFloatArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Float toFloat(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(float.class)) return (Float) in;
@@ -346,7 +346,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toLongArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -355,29 +355,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toLong(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toLong(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toLongArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toLongArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Long toLong(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(long.class)) return (Long) in;
@@ -419,7 +419,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toIntArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -428,29 +428,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toInt(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toInt(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toIntArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toIntArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Integer toInt(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(int.class)) return (Integer) in;
@@ -492,7 +492,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toShortArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -501,29 +501,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toShort(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toShort(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toShortArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toShortArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Short toShort(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(short.class)) return (Short) in;
@@ -565,7 +565,7 @@ public class PrimitiveConverter<T> extends Converter<T> {
 	@SuppressWarnings("unchecked")
 	private <B> B toByteArray(Class<B> clazz, T array) {
 		ClassTools inTools = ClassTools.of(array.getClass());
-		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && CharSequence.class.isAssignableFrom(inTools.getArrayType())))
+		if(!inTools.isPrimitiveOrBoxedArray() && !(inTools.isArray() && inTools.getArrayType().isSubOf(CharSequence.class)))
 			throw new NonConversibleTypeException();
 
 		int depth = inTools.getArrayDepth();
@@ -574,29 +574,29 @@ public class PrimitiveConverter<T> extends Converter<T> {
 		ClassTools outTools = ClassTools.of(clazz);
 		if(depth < 1) throw new NonConversibleTypeException();
 		if(depth == 1) {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType()).toByte(o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType()).toByte(o);
 			}
 			return (B) result;
 		} else {
-			Object result = Array.newInstance(outTools.getArrayType(), iterator.getLength());
+			Object result = outTools.getArrayType().createArray(iterator.getLength());
 			for(int i = 1; i < depth; i++)
-				result = Array.newInstance(result.getClass(), iterator.getLength());
+				result = ClassTools.of(result.getClass()).createArray(iterator.getLength());
 
 			while(iterator.hasNext()) {
 				int index = iterator.getCurrentIndex();
 				Object o = iterator.next();
-				((Object[])result)[index] = new PrimitiveConverter<>(inTools.getArrayType())
-						.toByteArray(ClassTools.of(Object.class).getArrayTypeName(outTools.getArrayType(), depth - 1), o);
+				((Object[])result)[index] = Primitiva.Convert.primitive(inTools.getArrayType())
+						.toByteArray(ClassTools.dummy().getArrayTypeName(outTools.getArrayType(), depth - 1).get(), o);
 			}
 			return (B) result;
 		}
 	}
 	private Byte toByte(T in) {
-		ClassTools unboxed = this.getInClass().unbox();
+		ClassTools unboxed = this.unbox();
 		if(!unboxed.isPrimitive() && !unboxed.isSubOf(CharSequence.class))
 			throw new NonConversibleTypeException();
 		else if(unboxed.get().equals(byte.class)) return (Byte) in;

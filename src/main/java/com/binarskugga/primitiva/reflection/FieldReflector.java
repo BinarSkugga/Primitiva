@@ -1,15 +1,23 @@
 package com.binarskugga.primitiva.reflection;
 
 import com.binarskugga.primitiva.ClassTools;
-import com.binarskugga.primitiva.exception.*;
+import com.binarskugga.primitiva.Primitiva;
+import com.binarskugga.primitiva.exception.CannotGetFieldException;
+import com.binarskugga.primitiva.exception.CannotSetFieldException;
+import com.binarskugga.primitiva.exception.NotAnnotatedException;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.util.List;
 
 public class FieldReflector extends Reflector<Field> {
 
 	public FieldReflector(Field f) {
-		super(f, ClassTools.of(f.getGenericType()));
+		super(f, f.getGenericType());
+	}
+
+	@Override public String getName() {
+		return this.getReflected().getName();
 	}
 
 	public void setAccessible(boolean accessible) {
@@ -21,12 +29,12 @@ public class FieldReflector extends Reflector<Field> {
 	}
 
 	@Override
-	public int getModifiers() {
+	public int getReflectedModifiers() {
 		return this.getReflected().getModifiers();
 	}
 
 	@Override
-	public <A extends Annotation> A getSafeAnnotation(Class<A> aClass) throws NotAnnotatedException {
+	public <A extends Annotation> A getSafeReflectedAnnotation(Class<A> aClass) throws NotAnnotatedException {
 		if(this.getReflected().isAnnotationPresent(aClass))
 			return this.getReflected().getAnnotation(aClass);
 		else
@@ -100,6 +108,15 @@ public class FieldReflector extends Reflector<Field> {
 		} catch(Exception e) {
 			throw new CannotGetFieldException();
 		}
+	}
+
+	public final Field getEquivalentIn(Class<?> clazz) {
+		ClassTools<?> tools = ClassTools.of(clazz);
+		List<Field> fs = tools.getFields(f -> {
+			FieldReflector reflector = Primitiva.Reflect.field(f);
+			return reflector.isSubOf(this.get()) && reflector.getName().equals(this.getName());
+		});
+		return fs.size() > 0 ? fs.get(0) : null;
 	}
 
 }

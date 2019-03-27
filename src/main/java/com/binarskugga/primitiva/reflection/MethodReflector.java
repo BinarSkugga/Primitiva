@@ -1,15 +1,17 @@
 package com.binarskugga.primitiva.reflection;
 
-import com.binarskugga.primitiva.*;
-import com.binarskugga.primitiva.exception.*;
+import com.binarskugga.primitiva.exception.CannotInvokeMethodException;
+import com.binarskugga.primitiva.exception.NonStaticMethodException;
+import com.binarskugga.primitiva.exception.NotAnnotatedException;
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class MethodReflector extends Reflector<Method> {
 
 	public MethodReflector(Method r) {
-		super(r, ClassTools.of(r.getGenericReturnType()));
+		super(r, r.getGenericReturnType());
 	}
 
 	public void setAccessible(boolean accessible) {
@@ -20,13 +22,17 @@ public class MethodReflector extends Reflector<Method> {
 		return this.getReflected().isAccessible();
 	}
 
+	@Override public String getName() {
+		return this.getReflected().getName();
+	}
+
 	@Override
-	public int getModifiers() {
+	public int getReflectedModifiers() {
 		return this.getReflected().getModifiers();
 	}
 
 	@Override
-	public <A extends Annotation> A getSafeAnnotation(Class<A> aClass) throws NotAnnotatedException {
+	public <A extends Annotation> A getSafeReflectedAnnotation(Class<A> aClass) throws NotAnnotatedException {
 		if(this.getReflected().isAnnotationPresent(aClass))
 			return this.getReflected().getAnnotation(aClass);
 		else

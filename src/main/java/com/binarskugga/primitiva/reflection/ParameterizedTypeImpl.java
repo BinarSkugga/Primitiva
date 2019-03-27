@@ -1,10 +1,10 @@
 package com.binarskugga.primitiva.reflection;
 
-import com.binarskugga.primitiva.*;
-import org.apache.commons.lang3.reflect.*;
+import com.binarskugga.primitiva.ClassTools;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 
 public class ParameterizedTypeImpl implements ParameterizedType {
 
